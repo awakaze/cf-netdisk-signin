@@ -101,7 +101,17 @@ MoePush 当前模板插值未自动转义反斜线；若通过 MoePush 转发 Ma
 当前成长值：117
 ```
 
-每项差值是短时间窗口的实际余额变化，仍可能混入同一时刻的自动成长；本轮余额差尤其可能包含等待补试期间的其他增长，不宣称是纯任务奖励。
+累计奖励领取后会显示例如 `✅ 累计 15 天奖励：已领取，实得成长值 +20`（数值仅为示例，实际按领取前后余额测量），然后显示新的下一档与剩余签到天数。用户账号的日常自动成长为凌晨约 1 点 +30；默认 11:30 执行，推送不再提示自动成长。
+
+## Cloudflare 用量估算
+
+部署使用一个 Worker、一个每日 Cron Trigger、一个带 SQLite 存储和 alarm 的 Durable Object，以及 Worker Secrets。alarm 等待补试时无需保持程序运行；只保留最近一轮报告，不累计保存每日历史。
+
+单账号每天正常运行：Worker 定时调用约 1 次、Durable Object 调用约 1 次；含一次签到补试和一次通知补发时，Durable Object 调用约 3 次。存储操作通常为几十次，保守按每天少于 100 次估算。按全天总计活跃 180 秒的保守假设，128 MB 对象约消耗 22.5 GB-s，而非把 30 分钟等待全部计为运行时间。
+
+Workers Free 的请求额度为每天 10 万；Durable Objects Free 为每天 10 万请求、13,000 GB-s、500 万行读取、10 万行写入，以及总共 5 GB 存储。本项目正常用量远低于这些额度；额度由账号其他项目共享，公网异常流量也会消耗 Worker 请求。该估算不代表账号实时账单，已有付费计划的基础月费仍按其订阅收取。
+
+来源：[Workers 定价](https://developers.cloudflare.com/workers/platform/pricing/)、[Durable Objects 定价](https://developers.cloudflare.com/durable-objects/platform/pricing/)。
 
 ## 手动检查
 

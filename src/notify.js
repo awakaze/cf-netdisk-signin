@@ -10,7 +10,8 @@ export function message(report) {
   const change = n => n >= 0 ? `+${n}` : String(n);
   const lines = [`日期：${report.date}（北京时间）`, `执行：${report.attempts === 1 ? '首次' : `${report.retryMinutes ?? 30} 分钟后补试`}；${report.ok ? '全部成功' : '存在失败或异常'}`];
   for (const step of report.steps) {
-    lines.push(`${step.ok ? '✅' : '❌'} ${step.label}：${states[step.state] || '未确认完成'}`);
+    const claimedGrowth = step.ok && step.state === 'claimed' && step.delta != null ? `，实得成长值 ${change(step.delta)}` : '';
+    lines.push(`${step.ok ? '✅' : '❌'} ${step.label}：${states[step.state] || '未确认完成'}${claimedGrowth}`);
     if (step.before != null) lines.push(`  成长值：${step.before} → ${step.after ?? '查询失败'}${step.delta != null ? `（${change(step.delta)}）` : ''}`);
     if (step.previous) {
       const p = step.previous;
@@ -24,7 +25,7 @@ export function message(report) {
     lines.push(info.nextDay == null ? '累计奖励：本周期已全部领取' : `下一档累计 ${info.nextDay} 天奖励：${info.remainingDays ? `还需签到 ${info.remainingDays} 天` : '已达标，待领取'}`);
   }
   if (report.finalGrowth != null) lines.push(`当前成长值：${report.finalGrowth}`);
-  if (report.initialGrowth != null && report.finalGrowth != null) lines.push(`本轮余额变化：${report.initialGrowth} → ${report.finalGrowth}（${change(report.finalGrowth - report.initialGrowth)}，可能含服务端自动成长）`);
+  if (report.initialGrowth != null && report.finalGrowth != null) lines.push(`本轮余额变化：${report.initialGrowth} → ${report.finalGrowth}（${change(report.finalGrowth - report.initialGrowth)}）`);
   for (const error of report.errors || []) lines.push(`❌ ${error}`);
   return { title: `百度网盘签到${report.ok ? '成功' : '异常'} · ${report.date}`, body: lines.join('\n'), date: report.date, status: report.ok ? 'success' : 'failure' };
 }

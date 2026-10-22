@@ -137,6 +137,17 @@ test('推送失败输出不泄漏 URL 或密钥；业务码可配置', async () 
   await assert.rejects(notify(env, r, async () => Response.json({ code: 1 })), /业务状态/);
 });
 
+test('累计奖励通知显示实际领取成长值，领取后显示下一档，不再提示自动成长', () => {
+  const r = { ...report(), ok: true, attempts: 1, initialGrowth: 100, finalGrowth: 120,
+    steps: [{ id: 'award-15', label: '累计 15 天奖励', ok: true, state: 'claimed', before: 100, after: 120, delta: 20 }],
+    awards: { signinDays: 15, nextDay: 30, remainingDays: 15 } };
+  const body = message(r).body;
+  assert.match(body, /累计 15 天奖励：已领取，实得成长值 \+20/);
+  assert.match(body, /下一档累计 30 天奖励：还需签到 15 天/);
+  assert.match(body, /本轮余额变化：100 → 120（\+20）/);
+  assert.doesNotMatch(body, /自动成长/);
+});
+
 test('Telegram MarkdownV2 保留字符按渠道转义，普通渠道保持原文', async () => {
   const r = { ...report(), ok: true, attempts: 1, steps: [{ label: 'PC 签到', ok: true, state: 'signed', before: 100, after: 104, delta: 4 }] };
   const env = { PUSH_SUCCESS: JSON.stringify({ url: 'https://push.example/tg', escape: 'telegram-markdown-v2' }) };
