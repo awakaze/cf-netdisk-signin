@@ -1,0 +1,14 @@
+{
+  "name": "cf-netdisk-signin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "百度网盘双端签到与累计奖励 Cloudflare Worker",
+  "scripts": {
+    "test": "node --test",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "wrangler deploy --dry-run"
+  },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}

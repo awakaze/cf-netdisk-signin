@@ -1,0 +1,17 @@
+name = "cf-netdisk-signin"
+main = "src/worker.js"
+compatibility_date = "2026-10-22"
+workers_dev = true
+keep_vars = true
+
+[triggers]
+# UTC 03:30 = 北京时间 11:30；失败由 Durable Object alarm 在 30 分钟后补试。
+crons = ["30 3 * * *"]
+
+[[durable_objects.bindings]]
+name = "SIGNIN"
+class_name = "SignInCoordinator"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SignInCoordinator"]
